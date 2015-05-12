@@ -4,24 +4,34 @@ int px = 3;  //player x and y
 int py = 3;
 int pcolor = 0; //color
 
+int start = 0; //used to start/setup
 
-int bombX[8];  //bomb x and y
-int bombY[8];
+int bombX[1];  //bomb x and y
+int bombY[1];
+
+struct BombStruct  //trying to change how i do bombs
+{
+  int x;
+  int y;
+};
+
+BombStruct bombs[4];
 
 struct Point
 {
   int x;  //x,y,number of bombs around it
   int y;
   int c;
-  boolean show=false;
+  boolean show;
 };
 
 Point field[64]; //pretty much all the points
 
 void setup()                    
 {
-  MeggyJrSimpleSetup();   
-  getPoints(); 
+  MeggyJrSimpleSetup();
+  placeBombs();
+  getPoints();
 }
 
 void loop()
@@ -34,6 +44,57 @@ void loop()
 }
 
 
+/*
+void setUp()
+{
+  while(start==0)
+  {
+    CheckButtonsDown();
+      if(Button_Up)
+        start=1;
+      if(Button_Down)
+        start=1;
+      if(Button_Left)
+        start=1;
+      if(Button_Right)
+        start=1;
+      if(Button_A)
+        start=1;
+      if(Button_B)
+        start=1;
+  }
+  randomSeed(millis());
+  placeBombs();
+  getPoints();
+  start=2;
+}
+*/
+
+
+void placeBombs()
+{
+  /*
+  for(int i=0;i<4;i++)
+  {
+    int ix=random(8);
+    int iy=random(8);
+    for(int j=0;i<4;j++)
+      if(ix==bombs[i].x&&iy==bombs[i].y)
+      {
+        ix=random(8);
+        iy=random(8);
+        j=0;
+      }
+    bombs[i].x = ix;
+    bombs[i].y = iy;
+  }
+  */
+  for(int i=0;i<4;i++)
+  {
+    bombs[i].x = random(8);
+    bombs[i].y = random(8);
+  }
+}
 
 void getPoints() //puts the number into each point on struct field, (8*x+y)
 {
@@ -41,31 +102,32 @@ void getPoints() //puts the number into each point on struct field, (8*x+y)
    for(int j=0;j<8;j++) //j is y
    {
      int c=0;
-     for(int b=0;b<8;b++) //b is bomb#
-       if(i!=bombX[b]&&j!=bombY[b])    //checks all spaces around current point for how many bombs
+     for(int b=0;b<4;b++) //b is bomb#
+       if(i==bombs[b].x && j==bombs[b].y)
+         c=10;
+       else    //checks all spaces around current point for how many bombs
        {
-         if(i-1==bombX[b]&&j+1==bombY[b])  
+         if(i-1==bombs[b].x&&j+1==bombs[b].y)  
            c++;
-         if(i==bombX[b]&&j+1==bombY[b])
+         if(i==bombs[b].x&&j+1==bombs[b].y)
            c++;
-         if(i+1==bombX[b]&&j+1==bombY[b])
+         if(i+1==bombs[b].x&&j+1==bombs[b].y)
            c++;
-         if(i-1==bombX[b]&&j==bombY[b])
+         if(i-1==bombs[b].x&&j==bombs[b].y)
            c++;
-         if(i+1==bombX[b]&&j==bombY[b])
+         if(i+1==bombs[b].x&&j==bombs[b].y)
            c++;
-         if(i-1==bombX[b]&&j-1==bombY[b])
+         if(i-1==bombs[b].x&&j-1==bombs[b].y)
            c++;
-         if(i==bombX[b]&&j-1==bombY[b])
+         if(i==bombs[b].x&&j-1==bombs[b].y)
            c++;
-         if(i+1==bombX[b]&&j-1==bombY[b])
+         if(i+1==bombs[b].x&&j-1==bombs[b].y)
            c++;
        }
-       else
-         c=10;
      field[8*i+j].x = i;
      field[8*i+j].y = j;
-     field[8*i+j].c = c;       //Something here with c being number of bombs around current point b=0eing checked 
+     field[8*i+j].c = c;
+     field[8*i+j].show = false;     //Something here with c being number of bombs around current point b=0eing checked 
    }
 }
 
@@ -136,7 +198,7 @@ void lose()
 void movement()
 {
   
-  CheckButtonsPress();        //directional buttons
+  CheckButtonsDown();        //directional buttons
     if(Button_Up)
       py ++;
     if(Button_Down)
@@ -158,7 +220,7 @@ void movement()
 
 void select()    //checks for button a then changes selected coord to show
 {
-  CheckButtonsPress();
+  CheckButtonsDown();
     if(Button_A)
       field[8*px+py].show=true;
 }
