@@ -1,3 +1,4 @@
+
 #include <MeggyJrSimple.h>    
 
 int px = 3;  //player x and y
@@ -38,9 +39,10 @@ void loop()
 {
   movement();
   select();
+  checkAroundEmpty();
   drawAll();
   ClearSlate();
-  delay(200);
+  delay(5);
 }
 
 
@@ -73,12 +75,12 @@ void setUp()
 
 void placeBombs()
 {
-  /*
+  
   for(int i=0;i<4;i++)
   {
     int ix=random(8);
     int iy=random(8);
-    for(int j=0;i<4;j++)
+    for(int j=0;j<4;j++)
       if(ix==bombs[i].x&&iy==bombs[i].y)
       {
         ix=random(8);
@@ -88,12 +90,13 @@ void placeBombs()
     bombs[i].x = ix;
     bombs[i].y = iy;
   }
-  */
+  /*
   for(int i=0;i<4;i++)
   {
     bombs[i].x = random(8);
     bombs[i].y = random(8);
   }
+  */
 }
 
 void getPoints() //puts the number into each point on struct field, (8*x+y)
@@ -141,13 +144,23 @@ void drawAll()
 
 void drawPlayer()
 {
+/*
   if(pcolor!=2)
     DrawPx(px,py,pcolor*15);
   if(pcolor==2)
     pcolor=0;
   else
     pcolor++;
-    
+*/
+    if(pcolor>300)
+      pcolor=0;
+    if(pcolor<200)
+      DrawPx(px,py,0);   
+    if(pcolor<100)
+      DrawPx(px,py,15);   
+    pcolor++;
+
+
 }  
 
 void drawShown()
@@ -198,7 +211,7 @@ void lose()
 void movement()
 {
   
-  CheckButtonsDown();        //directional buttons
+  CheckButtonsPress();        //directional buttons
     if(Button_Up)
       py ++;
     if(Button_Down)
@@ -216,6 +229,31 @@ void movement()
     px = 0;
   if(px>7)
     px = 7;
+}
+
+void checkAroundEmpty()
+{
+  for(int i=0;i<8;i++)
+    for(int j=0;j<8;j++)
+      if(field[8*i+j].c==0&&field[8*i+j].show==true)
+      {
+        if(8*i+j-8+1>0&&8*i+j-8+1<64)
+          field[8*i+j-8+1].show=true;
+        if(8*i+j+1>0&&8*i+j+1<64)
+          field[8*i+j+1].show=true;
+        if(8*i+j+8+1>0&&8*i+j+8+1<64)
+          field[8*i+j+8+1].show=true;
+        if(8*i+j-8>0&&8*i+j-8<64)
+          field[8*i+j-8].show=true;
+        if(8*i+j+8>0&&8*i+j+8<64)
+          field[8*i+j+8].show=true;
+        if(8*i+j-8-1>0&&8*i+j-8-1<64)
+          field[8*i+j-8-1].show=true;
+        if(8*i+j-1>0&&8*i+j-1<64)
+          field[8*i+j-1].show=true;
+        if(8*i+j+8-1>0&&8*i+j+8-1<64)
+          field[8*i+j+8-1].show=true;
+      }
 }
 
 void select()    //checks for button a then changes selected coord to show
