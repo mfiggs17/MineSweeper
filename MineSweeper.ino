@@ -1,4 +1,4 @@
-
+ 
 #include <MeggyJrSimple.h>    
 
 int px = 3;  //player x and y
@@ -7,6 +7,7 @@ int pcolor = 0; //color
 
 int start = 0; //used to start/setup
 
+int flagsUsed = 0;
 
 struct BombStruct  //trying to change how i do bombs
 {
@@ -15,6 +16,7 @@ struct BombStruct  //trying to change how i do bombs
 };
 
 BombStruct bombs[8];
+BombStruct flags[8];
 
 struct Point
 {
@@ -29,6 +31,7 @@ Point field[64]; //pretty much all the points
 void setup()                    
 {
   MeggyJrSimpleSetup();
+  flagsUsed=0;
   placeBombs();
   getPoints();
 }
@@ -39,13 +42,14 @@ void loop()
   select();
   restart();
   checkAroundEmpty();
+  checkWin();
   drawAll();
 
   
   CheckButtonsDown();
     if(Button_A&&Button_B)
       for(int i=0;i<8;i++)
-        DrawPx(bombs[i].x,bombs[i].y,Yellow);
+        DrawPx(flags[i].x,flags[i].y,Yellow);
   DisplaySlate();
   ClearSlate();
   delay(5);
@@ -110,8 +114,8 @@ void drawAll()
 {
   drawBlank();
   drawShown();
+  drawFlags();
   drawPlayer();
-  DisplaySlate();
 }
 
 void drawPlayer()
@@ -126,6 +130,12 @@ void drawPlayer()
 
 
 }  
+
+void drawFlags()
+{
+  for(int i=flagsUsed-1;i>-1;i--)
+    DrawPx(flags[i].x,flags[i].y,Yellow);
+}
 
 void drawShown()
 {
@@ -158,7 +168,7 @@ void drawBlank()
   for(int i=0;i<8;i++)
     for(int j=0;j<8;j++)
       if(field[8*i+j].show==false)
-        DrawPx(field[8*i+j].x,field[8*i+j].y,15);
+        DrawPx(field[8*i+j].x,field[8*i+j].y,White);
 }
 
 void bombPressed() //to do: make all bombs flash before lose screen
@@ -184,6 +194,27 @@ void movement()
       px --;
     if(Button_Right)
       px ++;
+    if(Button_B)    //flags
+    {
+      int deselect = 0;
+      for(int i=flagsUsed-1;i>-1;i--)
+        if(px==flags[i].x&&py==flags[i].y)
+        {
+          for(int j=i;j<flagsUsed;j++)
+          {
+            flags[j].x = flags[j+1].x;  //for some reason i could not get checkbuttonspress to work in a different method
+            flags[j].y = flags[j+1].y;
+          }
+          flagsUsed--;
+          deselect++;
+        }
+       if(flagsUsed<8&&deselect==0)
+      {
+        flags[flagsUsed].x = px;
+        flags[flagsUsed].y = py;
+        flagsUsed++;
+      }  //flags
+    }
     
   if(py<0)            //screen limits
     py = 0;
@@ -247,12 +278,21 @@ void select()    //checks for button a then changes selected coord to show
       field[8*px+py].show=true;
 }
 
-/*void flag()
+void win()
 {
-  CheckButtonsPress();
-    if(Button_B)
+  for(int i=0;i<8;i++)
+    for(int j=0;j<8;j++)
+      DrawPx(i,j,i);
+  DisplaySlate();
 }
-*/
+
+void checkWin()
+{
+  if(flagsUsed>7)
+    for(int i=0;i<8;i++)
+      if(flags[i].x==bombs[i].x&&flags[i].y==bombs[i].y)
+        win();
+}
 
 void restart()
 {
