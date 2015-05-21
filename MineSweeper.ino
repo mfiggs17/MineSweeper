@@ -42,8 +42,8 @@ void loop()
   select();
   restart();
   checkAroundEmpty();
-  checkWin();
   drawAll();
+  checkWin();
 
   
   CheckButtonsDown();
@@ -113,8 +113,8 @@ void getPoints() //puts the number into each point on struct field, (8*x+y)
 void drawAll()
 {
   drawBlank();
-  drawShown();
   drawFlags();
+  drawShown();
   drawPlayer();
 }
 
@@ -288,10 +288,19 @@ void win()
 
 void checkWin()
 {
+  int counter = 0;
+  for(int i=0;i<64;i++)
+    if(field[i].show==true)
+      counter++;
+  if(counter==56)
+    win();
+  
+  /*
   if(flagsUsed>7)
     for(int i=0;i<8;i++)
       if(flags[i].x==bombs[i].x&&flags[i].y==bombs[i].y)
         win();
+        */
 }
 
 void restart()
